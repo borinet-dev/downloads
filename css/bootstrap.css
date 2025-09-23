@@ -4331,12 +4331,11 @@ input[type="submit"].btn.btn-mini {
 .navbar-inverse .btn-navbar[disabled] {
   color: #ffffff;
   background-color: #040404;
-  *background-color: #000000;
 }
 
 .navbar-inverse .btn-navbar:active,
 .navbar-inverse .btn-navbar.active {
-  background-color: #000000 \9;
+  background-color: #2a2a2a \9;
 }
 
 .breadcrumb {
@@ -4576,7 +4575,7 @@ input[type="submit"].btn.btn-mini {
   bottom: 0;
   left: 0;
   z-index: 1040;
-  background-color: #000000;
+  background-color: #2a2a2a;
 }
 
 .modal-backdrop.fade {
@@ -4730,7 +4729,7 @@ input[type="submit"].btn.btn-mini {
   color: #ffffff;
   text-align: center;
   text-decoration: none;
-  background-color: #000000;
+  background-color: #2a2a2a;
   -webkit-border-radius: 4px;
      -moz-border-radius: 4px;
           border-radius: 4px;
