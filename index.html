@@ -118,8 +118,8 @@
 <div id="viewer">
   <div class="bd" style="
     background-color:#2a2a2a; color:white;
-    width:1067px !important;
-    max-width:none !important;
+    width:min(1067px, calc(100% - 24px)) !important;
+    max-width:100% !important;
     display:block;
     box-sizing:border-box;
     margin:0 auto;
@@ -153,10 +153,35 @@
     }
   }
 
-  /* 모바일(뷰포트)에서는 무조건 세로 */
+  /* 모바일/터치 기기에서는 다운로드 안내만 표시 */
+  body.mobile-view #pc-content,
+  body.mobile-view .driver-list,
+  body.mobile-view #pc-remove-guide{
+    display:none !important;
+  }
+
+  body.mobile-view #mobile-content{
+    display:block !important;
+  }
+
+  body.mobile-view #viewer .bd{
+    width:min(100%, calc(100vw - 24px)) !important;
+    max-width:100% !important;
+  }
+
+  /* JS가 막히더라도 좁은 화면에서는 모바일 화면으로 보이게 보조 처리 */
   @media (max-width: 768px){
+    #viewer .bd{
+      width:min(100%, calc(100vw - 24px)) !important;
+      max-width:100% !important;
+    }
     #viewer .bd .dl-row{ grid-template-columns: 1fr !important; }
     #viewer .bd .dl-row img{ width:min(92vw, 272px); }
+	
+	#pc-content,
+    .driver-list,
+    #pc-remove-guide{ display:none !important; }
+    #mobile-content{ display:block !important; }
   }
 
 </style>
@@ -224,7 +249,7 @@
 	<br><br><br>
 
 <ul class="driver-list" style="box-sizing: border-box; list-style: none; padding: 60px 0px; font-family: &quot;Noto Sans&quot;, &quot;Noto Sans KR&quot;, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; margin: 0px auto; display: flex; flex-direction: row; color: rgb(255, 255, 255); font-size: medium;"><li class="driver-directx" style="box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 294.474px; padding: 0px 20px 16px; letter-spacing: 0px !important;"><a class="driver-circle" href="https://support.microsoft.com/ko-kr/topic/%EC%B5%9C%EC%8B%A0-%EB%B2%84%EC%A0%84%EC%9D%98-directx-%EC%84%A4%EC%B9%98%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95-d1f5ffa5-dae2-246c-91b1-ee1e973ed8c2" target="_blank" style="box-sizing: border-box; background-color: rgb(75, 97, 87); text-decoration-line: none; color: rgb(255, 255, 255); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 168px; height: 168px; overflow: hidden; font-size: 18px; border-radius: 100%; letter-spacing: 0px !important;"><span class="text" style="box-sizing: border-box; z-index: 5; letter-spacing: 0px !important;">DirectX</span><span class="icon-download" style="box-sizing: border-box; display: block; background-repeat: no-repeat; background-position: 50% 50%; background-size: contain; text-indent: -9999em; text-wrap-mode: nowrap; overflow: hidden; width: 26px; height: 21px; margin: 25px auto 0px; background-image: url(&quot;data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAVCAYAAABYHP4bAAAAxUlEQVRIie2UYQ3CMBCF32GASZgEcDAJQwEWcAAOhgMkTAI4mASYAnDwkSa3ZFkWoA0j/NhLmuyau/uuL+0UIyAD6qgi1yIyP5O0+gUoWTNoBv0JCKiAPKYRUACHKJCkVtIZKD+E7CSdQk3McF1xDlz7U3Z7g7yj50U5MAZr3MqsD/I4nLoO3+96vbx1ZnYzs7WHjaS8G8Dji5ltzOyRfJqhgD1w9xWs2n6t+QisdLuS/uCzkmT+KKuJ7SsCKLyB5ZQUM2ufPuCI9k07zGIAAAAASUVORK5CYII=&quot;); z-index: 5; letter-spacing: 0px !important;"></span></a><div class="driver-text" style="box-sizing: border-box; margin: 24px 0px 0px; font-size: 15px; color: rgba(255, 255, 255, 0.83); text-align: center; letter-spacing: 0px !important;">원활한 게임 진행과 해킹 방지 기능<br style="box-sizing: border-box; letter-spacing: 0px !important;">사용을 위해 Direct X 9.0c 이상의 버전이 설치되어야 합니다.</div></li><li class="driver-nvidia" style="box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 295.17px; padding: 0px 20px 16px; border-width: 0px 0px 0px 0.909091px; border-top-style: initial; border-top-color: initial; border-right-style: initial; border-bottom-style: initial; border-right-color: initial; border-bottom-color: initial; border-image: initial; border-left-style: solid; border-left-color: rgba(255, 255, 255, 0.08); letter-spacing: 0px !important;"><a class="driver-circle" href="https://www.nvidia.co.kr/Download/index.aspx?lang=kr" target="_blank" style="box-sizing: border-box; background-color: rgb(82, 96, 75); text-decoration-line: none; color: rgb(255, 255, 255); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 168px; height: 168px; overflow: hidden; font-size: 18px; border-radius: 100%; letter-spacing: 0px !important;"><span class="text" style="box-sizing: border-box; z-index: 5; letter-spacing: 0px !important;">NVIDIA</span><span class="icon-download" style="box-sizing: border-box; display: block; background-repeat: no-repeat; background-position: 50% 50%; background-size: contain; text-indent: -9999em; text-wrap-mode: nowrap; overflow: hidden; width: 26px; height: 21px; margin: 25px auto 0px; background-image: url(&quot;data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAVCAYAAABYHP4bAAAAxUlEQVRIie2UYQ3CMBCF32GASZgEcDAJQwEWcAAOhgMkTAI4mASYAnDwkSa3ZFkWoA0j/NhLmuyau/uuL+0UIyAD6qgi1yIyP5O0+gUoWTNoBv0JCKiAPKYRUACHKJCkVtIZKD+E7CSdQk3McF1xDlz7U3Z7g7yj50U5MAZr3MqsD/I4nLoO3+96vbx1ZnYzs7WHjaS8G8Dji5ltzOyRfJqhgD1w9xWs2n6t+QisdLuS/uCzkmT+KKuJ7SsCKLyB5ZQUM2ufPuCI9k07zGIAAAAASUVORK5CYII=&quot;); z-index: 5; letter-spacing: 0px !important;"></span></a><div class="driver-text" style="box-sizing: border-box; margin: 24px 0px 0px; font-size: 15px; color: rgba(255, 255, 255, 0.83); text-align: center; letter-spacing: 0px !important;">원활한 플레이를 위해<br style="box-sizing: border-box; letter-spacing: 0px !important;">그래픽 드라이버를 확인해주세요.<br style="box-sizing: border-box; letter-spacing: 0px !important;">GeForce, Riva, TNT 시리즈</div></li><li class="driver-amd" style="box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 295.17px; padding: 0px 20px 16px; border-width: 0px 0px 0px 0.909091px; border-top-style: initial; border-top-color: initial; border-right-style: initial; border-bottom-style: initial; border-right-color: initial; border-bottom-color: initial; border-image: initial; border-left-style: solid; border-left-color: rgba(255, 255, 255, 0.08); letter-spacing: 0px !important;"><a class="driver-circle" href="https://www.amd.com/ko/support" target="_blank" style="box-sizing: border-box; background-color: rgb(93, 98, 99); text-decoration-line: none; color: rgb(255, 255, 255); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 168px; height: 168px; overflow: hidden; font-size: 18px; border-radius: 100%; letter-spacing: 0px !important;"><span class="text" style="box-sizing: border-box; z-index: 5; letter-spacing: 0px !important;">AMD</span><span class="icon-download" style="box-sizing: border-box; display: block; background-repeat: no-repeat; background-position: 50% 50%; background-size: contain; text-indent: -9999em; text-wrap-mode: nowrap; overflow: hidden; width: 26px; height: 21px; margin: 25px auto 0px; background-image: url(&quot;data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAVCAYAAABYHP4bAAAAxUlEQVRIie2UYQ3CMBCF32GASZgEcDAJQwEWcAAOhgMkTAI4mASYAnDwkSa3ZFkWoA0j/NhLmuyau/uuL+0UIyAD6qgi1yIyP5O0+gUoWTNoBv0JCKiAPKYRUACHKJCkVtIZKD+E7CSdQk3McF1xDlz7U3Z7g7yj50U5MAZr3MqsD/I4nLoO3+96vbx1ZnYzs7WHjaS8G8Dji5ltzOyRfJqhgD1w9xWs2n6t+QisdLuS/uCzkmT+KKuJ7SsCKLyB5ZQUM2ufPuCI9k07zGIAAAAASUVORK5CYII=&quot;); z-index: 5; letter-spacing: 0px !important;"></span></a><div class="driver-text" style="box-sizing: border-box; margin: 24px 0px 0px; font-size: 15px; color: rgba(255, 255, 255, 0.83); text-align: center; letter-spacing: 0px !important;">원활한 플레이를 위해<br style="box-sizing: border-box; letter-spacing: 0px !important;">그래픽 드라이버를 확인해주세요.<br style="box-sizing: border-box; letter-spacing: 0px !important;">Radeon, All in Wonder, Rage 시리즈</div></li></ul>
-<span style="font-size: 1.5em;">
+<span id="pc-remove-guide" style="font-size: 1.5em;">
 제거방법1: 제어판 > 프로그램 추가/제거 > Lineage II - 리버티 클라이언트<br>
 제거방법2: 설정 > 앱 > 설치된 앱 > Lineage II - 리버티 클라이언트<br>
 지원 운영체제: Windows 10, Windows 11
@@ -242,6 +267,40 @@
 <br>
 <br>
 </div>
+
+<script>
+	(function() {
+		function isMobileDevice() {
+			const userAgent = navigator.userAgent || navigator.vendor || window.opera || '';
+			const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|IEmobile|Opera Mini|Opera Mobi|Mobile|SAMSUNG|LG|MOT|SonyEricsson/i;
+			const isTouchSmallScreen = navigator.maxTouchPoints > 0 && window.matchMedia('(max-width: 1024px)').matches;
+
+			return mobileRegex.test(userAgent) || isTouchSmallScreen;
+		}
+
+		function applyDownloadView() {
+			const pcContent = document.getElementById('pc-content');
+			const mobileContent = document.getElementById('mobile-content');
+			const isMobile = isMobileDevice();
+
+			document.body.classList.toggle('mobile-view', isMobile);
+			document.body.classList.toggle('pc-view', !isMobile);
+
+			if (pcContent && mobileContent) {
+				pcContent.style.display = isMobile ? 'none' : 'block';
+				mobileContent.style.display = isMobile ? 'block' : 'none';
+			}
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', applyDownloadView);
+		} else {
+			applyDownloadView();
+		}
+
+		window.addEventListener('resize', applyDownloadView);
+	})();
+</script>
 
   </div>
 </div><br><br>
