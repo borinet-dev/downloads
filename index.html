@@ -161,27 +161,85 @@
   }
 
   body.mobile-view #mobile-content{
-    display:block !important;
+    display:flex !important;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:0 !important;
+    margin:0 auto !important;
+    padding:0 12px 48px !important;
+    text-align:center;
+    box-sizing:border-box;
+  }
+
+  body.mobile-view #mobile-content br{
+    display:none !important;
+  }
+
+  body.mobile-view #mobile-content strong{
+    display:block;
+    margin:4px 0;
+  }
+
+  body.mobile-view #mobile-content span{
+    font-size:clamp(20px, 6vw, 28px) !important;
+    line-height:1.4 !important;
   }
 
   body.mobile-view #viewer .bd{
-    width:min(100%, calc(100vw - 24px)) !important;
-    max-width:100% !important;
+    display:contents !important;
+    width:auto !important;
+    max-width:none !important;
+  }
+
+  body.mobile-view #viewer .bd > br{
+    display:none !important;
+  }
+
+
+  body.mobile-view #mobile-content.section,
+  body.mobile-view #mobile-content.primary-section{
+    padding-top:0 !important;
+    margin-top:0 !important;
   }
 
   /* JS가 막히더라도 좁은 화면에서는 모바일 화면으로 보이게 보조 처리 */
   @media (max-width: 768px){
     #viewer .bd{
-      width:min(100%, calc(100vw - 24px)) !important;
-      max-width:100% !important;
+      display:contents !important;
+      width:auto !important;
+      max-width:none !important;
     }
+
     #viewer .bd .dl-row{ grid-template-columns: 1fr !important; }
     #viewer .bd .dl-row img{ width:min(92vw, 272px); }
-	
-	#pc-content,
+
+    #pc-content,
     .driver-list,
     #pc-remove-guide{ display:none !important; }
-    #mobile-content{ display:block !important; }
+    #viewer .bd > br{ display:none !important; }
+    #mobile-content.section,
+    #mobile-content.primary-section{
+      padding-top:0 !important;
+      margin-top:0 !important;
+    }
+    #mobile-content{
+      display:flex !important;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height:0 !important;
+      margin:0 auto !important;
+      padding:0 12px 48px !important;
+      text-align:center;
+      box-sizing:border-box;
+    }
+    #mobile-content br{ display:none !important; }
+    #mobile-content strong{ display:block; margin:4px 0; }
+    #mobile-content span{
+      font-size:clamp(20px, 6vw, 28px) !important;
+      line-height:1.4 !important;
+    }
   }
 
 </style>
@@ -339,5 +397,3 @@
     <script src="https://borinet-dev.github.io/css/js/main.js"></script>
     </body>
 </html>
-
-
