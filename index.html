@@ -189,6 +189,89 @@
     overflow-wrap:break-word !important;
   }
 
+
+  /* 시스템 권장 사양 영역 반응형 처리 */
+  #viewer .bd .spec-wrap{
+    width:100% !important;
+    max-width:100% !important;
+    display:flex !important;
+    flex-wrap:wrap !important;
+    justify-content:center !important;
+    align-items:stretch !important;
+    gap:clamp(16px, 3vw, 40px) !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+
+  #viewer .bd .spec-table{
+    flex:1 1 420px !important;
+    width:min(100%, 570px) !important;
+    min-width:0 !important;
+    max-width:570px !important;
+    table-layout:fixed !important;
+    box-sizing:border-box !important;
+  }
+
+  #viewer .bd .spec-table thead th{
+    height:auto !important;
+    padding:10px 12px !important;
+    font-size:clamp(14px, 1.6vw, 16px) !important;
+    line-height:1.4 !important;
+    text-align:center !important;
+    word-break:keep-all !important;
+  }
+
+  #viewer .bd .spec-table tbody th,
+  #viewer .bd .spec-table tbody td{
+    height:auto !important;
+    min-height:42px !important;
+    padding:clamp(6px, 1vw, 8px) clamp(10px, 1.8vw, 22px) !important;
+    font-size:clamp(13px, 1.35vw, 14px) !important;
+    line-height:1.55 !important;
+    box-sizing:border-box !important;
+    word-break:keep-all !important;
+    overflow-wrap:break-word !important;
+  }
+
+  #viewer .bd .spec-table tbody th{
+    width:34% !important;
+    text-align:left !important;
+    white-space:normal !important;
+  }
+
+  #viewer .bd .spec-table tbody td{
+    width:66% !important;
+    text-align:right !important;
+    white-space:normal !important;
+  }
+
+  @container (max-width: 960px){
+    #viewer .bd .spec-table{
+      flex-basis:100% !important;
+      max-width:640px !important;
+    }
+  }
+
+  @container (max-width: 520px){
+    #viewer .bd .spec-wrap{
+      gap:18px !important;
+    }
+
+    #viewer .bd .spec-table tbody th,
+    #viewer .bd .spec-table tbody td{
+      padding:7px 10px !important;
+      font-size:13px !important;
+    }
+
+    #viewer .bd .spec-table tbody th{
+      width:36% !important;
+    }
+
+    #viewer .bd .spec-table tbody td{
+      width:64% !important;
+    }
+  }
+
   /* 모바일/터치 기기에서는 다운로드 안내만 표시 */
   body.mobile-view #pc-content,
   body.mobile-view .driver-list,
