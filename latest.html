@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>LibertyBoard 다운로드</title>
+  <script>
+    (function () {
+      var apkUrl = "https://borinet-dev.github.io/downloads/LibertyBoard.apk";
+      var separator = apkUrl.indexOf("?") === -1 ? "?" : "&";
+      location.replace(apkUrl + separator + "v=" + Date.now());
+    })();
+  </script>
+</head>
+<body>
+  <p>다운로드가 자동으로 시작되지 않으면 아래 링크를 눌러주세요.</p>
+  <p><a id="downloadLink" href="https://borinet-dev.github.io/downloads/LibertyBoard.apk">LibertyBoard 최신 APK 다운로드</a></p>
+  <script>
+    (function () {
+      var apkUrl = "https://borinet-dev.github.io/downloads/LibertyBoard.apk";
+      var separator = apkUrl.indexOf("?") === -1 ? "?" : "&";
+      document.getElementById("downloadLink").href = apkUrl + separator + "v=" + Date.now();
+    })();
+  </script>
+</body>
+</html>
