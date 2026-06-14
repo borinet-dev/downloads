@@ -11,6 +11,7 @@ on:
       - 'version.json'
       - 'downloads/LibertyBoard.apk'
       - 'downloads/version.json'
+      - '.github/workflows/app-update-fcm.yml'
 
 jobs:
   notify-app-update:
@@ -43,13 +44,15 @@ jobs:
             exit 1
           fi
 
-          LATEST_VERSION_CODE=$(python3 - <<PY
-import json
-with open("$VERSION_FILE", "r", encoding="utf-8") as f:
-    data = json.load(f)
-value = data.get("latestVersionCode") or data.get("latest_version_code") or data.get("versionCode") or data.get("version_code") or ""
-print(str(value).strip())
-PY
+          LATEST_VERSION_CODE=$(python3 <<'PYCODE'
+          import json
+          import os
+          version_file = os.environ["VERSION_FILE"]
+          with open(version_file, "r", encoding="utf-8") as f:
+              data = json.load(f)
+          value = data.get("latestVersionCode") or data.get("latest_version_code") or data.get("versionCode") or data.get("version_code") or ""
+          print(str(value).strip())
+          PYCODE
           )
 
           if [ -z "$LATEST_VERSION_CODE" ]; then
@@ -60,28 +63,33 @@ PY
           LOCAL_APK_SHA256=$(sha256sum "$APK_FILE" | awk '{print $1}')
           LOCAL_VERSION_SHA256=$(sha256sum "$VERSION_FILE" | awk '{print $1}')
 
+          PUBLIC_BASE_URL="https://borinet-dev.github.io/downloads"
+          PUBLIC_APK_URL="${PUBLIC_BASE_URL}/${APK_FILE}"
+          PUBLIC_VERSION_URL="${PUBLIC_BASE_URL}/${VERSION_FILE}"
+
           echo "APK_FILE=$APK_FILE" >> "$GITHUB_ENV"
           echo "VERSION_FILE=$VERSION_FILE" >> "$GITHUB_ENV"
           echo "LATEST_VERSION_CODE=$LATEST_VERSION_CODE" >> "$GITHUB_ENV"
           echo "LOCAL_APK_SHA256=$LOCAL_APK_SHA256" >> "$GITHUB_ENV"
           echo "LOCAL_VERSION_SHA256=$LOCAL_VERSION_SHA256" >> "$GITHUB_ENV"
+          echo "PUBLIC_APK_URL=$PUBLIC_APK_URL" >> "$GITHUB_ENV"
+          echo "PUBLIC_VERSION_URL=$PUBLIC_VERSION_URL" >> "$GITHUB_ENV"
 
           echo "APK_FILE=$APK_FILE"
           echo "VERSION_FILE=$VERSION_FILE"
           echo "LATEST_VERSION_CODE=$LATEST_VERSION_CODE"
           echo "LOCAL_APK_SHA256=$LOCAL_APK_SHA256"
           echo "LOCAL_VERSION_SHA256=$LOCAL_VERSION_SHA256"
+          echo "PUBLIC_APK_URL=$PUBLIC_APK_URL"
+          echo "PUBLIC_VERSION_URL=$PUBLIC_VERSION_URL"
 
       - name: Wait until GitHub Pages serves the new APK and version.json
         shell: bash
-        env:
-          PUBLIC_APK_URL: https://borinet-dev.github.io/downloads/LibertyBoard.apk
-          PUBLIC_VERSION_URL: https://borinet-dev.github.io/downloads/version.json
         run: |
           set -euo pipefail
 
           for attempt in $(seq 1 40); do
-            CACHE_KEY="${LATEST_VERSION_CODE}-${GITHUB_SHA}-${attempt}"
+            CACHE_KEY="${LATEST_VERSION_CODE}-${GITHUB_SHA}-${attempt}-$(date +%s)"
             CHECK_APK_URL="${PUBLIC_APK_URL}?v=${CACHE_KEY}"
             CHECK_VERSION_URL="${PUBLIC_VERSION_URL}?v=${CACHE_KEY}"
 
@@ -100,7 +108,7 @@ PY
                 echo "APK hash mismatch. public=$PUBLIC_APK_SHA256 local=$LOCAL_APK_SHA256"
               fi
             else
-              echo "APK is not available yet."
+              echo "APK is not available yet. url=$CHECK_APK_URL"
             fi
 
             if curl -fLsS \
@@ -115,7 +123,7 @@ PY
                 echo "version.json hash mismatch. public=$PUBLIC_VERSION_SHA256 local=$LOCAL_VERSION_SHA256"
               fi
             else
-              echo "version.json is not available yet."
+              echo "version.json is not available yet. url=$CHECK_VERSION_URL"
             fi
 
             if [ "$APK_READY" = "1" ] && [ "$VERSION_READY" = "1" ]; then
@@ -137,11 +145,15 @@ PY
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
           set -euo pipefail
-          PROJECT_ID=$(python3 - <<'PY'
-import json
-import os
-print(json.loads(os.environ['FIREBASE_SERVICE_ACCOUNT_JSON'])['project_id'])
-PY
+          if [ -z "${FIREBASE_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "FIREBASE_SERVICE_ACCOUNT_JSON secret이 비어 있습니다."
+            exit 1
+          fi
+          PROJECT_ID=$(python3 <<'PYCODE'
+          import json
+          import os
+          print(json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT_JSON"])["project_id"])
+          PYCODE
           )
           echo "PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
 
@@ -153,41 +165,42 @@ PY
           token_format: access_token
           access_token_scopes: https://www.googleapis.com/auth/firebase.messaging
 
+      - name: Build FCM payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PYCODE'
+          import json
+          import os
+
+          apk_url = os.environ.get("PUBLIC_APK_URL_WITH_CACHE") or os.environ.get("PUBLIC_APK_URL") or "https://borinet-dev.github.io/downloads/LibertyBoard.apk"
+          latest = os.environ.get("LATEST_VERSION_CODE", "")
+          payload = {
+              "message": {
+                  "topic": "app_update",
+                  "android": {"priority": "HIGH"},
+                  "data": {
+                      "type": "app_update",
+                      "title": "리버티 게시판 앱 업데이트",
+                      "body": "새 버전이 등록되었습니다. 업데이트 후 이용해 주세요.",
+                      "apk_url": apk_url,
+                      "apkUrl": apk_url,
+                      "latest_version_code": str(latest),
+                      "latestVersionCode": str(latest)
+                  }
+              }
+          }
+          with open("fcm-payload.json", "w", encoding="utf-8") as f:
+              json.dump(payload, f, ensure_ascii=False)
+          PYCODE
+          cat fcm-payload.json
+
       - name: Send FCM app update topic message
         shell: bash
         env:
           ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
         run: |
           set -euo pipefail
-
-          python3 - <<'PY'
-import json
-import os
-
-apk_url = os.environ.get('PUBLIC_APK_URL_WITH_CACHE', 'https://borinet-dev.github.io/downloads/LibertyBoard.apk')
-latest = os.environ.get('LATEST_VERSION_CODE', '')
-
-payload = {
-    "message": {
-        "topic": "app_update",
-        "android": {
-            "priority": "HIGH"
-        },
-        "data": {
-            "type": "app_update",
-            "title": "리버티 게시판 앱 업데이트",
-            "body": "새 버전이 등록되었습니다. 업데이트 후 이용해 주세요.",
-            "apk_url": apk_url,
-            "apkUrl": apk_url,
-            "latest_version_code": str(latest),
-            "latestVersionCode": str(latest)
-        }
-    }
-}
-
-with open('fcm-payload.json', 'w', encoding='utf-8') as f:
-    json.dump(payload, f, ensure_ascii=False)
-PY
 
           echo "Sending app_update FCM. versionCode=${LATEST_VERSION_CODE} apkUrl=${PUBLIC_APK_URL_WITH_CACHE}"
 
