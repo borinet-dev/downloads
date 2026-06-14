@@ -1,119 +1,206 @@
 name: Notify LibertyBoard app update
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
+      - master
     paths:
       - 'LibertyBoard.apk'
       - 'version.json'
       - 'downloads/LibertyBoard.apk'
       - 'downloads/version.json'
-      - '.github/workflows/app-update-fcm.yml'
-  workflow_dispatch:
 
 jobs:
   notify-app-update:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Send FCM app_update topic message
+      - name: Find update files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -f "LibertyBoard.apk" ]; then
+            APK_FILE="LibertyBoard.apk"
+          elif [ -f "downloads/LibertyBoard.apk" ]; then
+            APK_FILE="downloads/LibertyBoard.apk"
+          else
+            echo "LibertyBoard.apk 파일을 찾을 수 없습니다."
+            exit 1
+          fi
+
+          if [ -f "version.json" ]; then
+            VERSION_FILE="version.json"
+          elif [ -f "downloads/version.json" ]; then
+            VERSION_FILE="downloads/version.json"
+          else
+            echo "version.json 파일을 찾을 수 없습니다."
+            exit 1
+          fi
+
+          LATEST_VERSION_CODE=$(python3 - <<PY
+import json
+with open("$VERSION_FILE", "r", encoding="utf-8") as f:
+    data = json.load(f)
+value = data.get("latestVersionCode") or data.get("latest_version_code") or data.get("versionCode") or data.get("version_code") or ""
+print(str(value).strip())
+PY
+          )
+
+          if [ -z "$LATEST_VERSION_CODE" ]; then
+            echo "version.json에서 latestVersionCode 값을 찾을 수 없습니다."
+            exit 1
+          fi
+
+          LOCAL_APK_SHA256=$(sha256sum "$APK_FILE" | awk '{print $1}')
+          LOCAL_VERSION_SHA256=$(sha256sum "$VERSION_FILE" | awk '{print $1}')
+
+          echo "APK_FILE=$APK_FILE" >> "$GITHUB_ENV"
+          echo "VERSION_FILE=$VERSION_FILE" >> "$GITHUB_ENV"
+          echo "LATEST_VERSION_CODE=$LATEST_VERSION_CODE" >> "$GITHUB_ENV"
+          echo "LOCAL_APK_SHA256=$LOCAL_APK_SHA256" >> "$GITHUB_ENV"
+          echo "LOCAL_VERSION_SHA256=$LOCAL_VERSION_SHA256" >> "$GITHUB_ENV"
+
+          echo "APK_FILE=$APK_FILE"
+          echo "VERSION_FILE=$VERSION_FILE"
+          echo "LATEST_VERSION_CODE=$LATEST_VERSION_CODE"
+          echo "LOCAL_APK_SHA256=$LOCAL_APK_SHA256"
+          echo "LOCAL_VERSION_SHA256=$LOCAL_VERSION_SHA256"
+
+      - name: Wait until GitHub Pages serves the new APK and version.json
+        shell: bash
+        env:
+          PUBLIC_APK_URL: https://borinet-dev.github.io/downloads/LibertyBoard.apk
+          PUBLIC_VERSION_URL: https://borinet-dev.github.io/downloads/version.json
+        run: |
+          set -euo pipefail
+
+          for attempt in $(seq 1 40); do
+            CACHE_KEY="${LATEST_VERSION_CODE}-${GITHUB_SHA}-${attempt}"
+            CHECK_APK_URL="${PUBLIC_APK_URL}?v=${CACHE_KEY}"
+            CHECK_VERSION_URL="${PUBLIC_VERSION_URL}?v=${CACHE_KEY}"
+
+            APK_READY=0
+            VERSION_READY=0
+
+            if curl -fLsS \
+              -H "Cache-Control: no-cache" \
+              -H "Pragma: no-cache" \
+              "$CHECK_APK_URL" \
+              -o /tmp/LibertyBoard.public.apk; then
+              PUBLIC_APK_SHA256=$(sha256sum /tmp/LibertyBoard.public.apk | awk '{print $1}')
+              if [ "$PUBLIC_APK_SHA256" = "$LOCAL_APK_SHA256" ]; then
+                APK_READY=1
+              else
+                echo "APK hash mismatch. public=$PUBLIC_APK_SHA256 local=$LOCAL_APK_SHA256"
+              fi
+            else
+              echo "APK is not available yet."
+            fi
+
+            if curl -fLsS \
+              -H "Cache-Control: no-cache" \
+              -H "Pragma: no-cache" \
+              "$CHECK_VERSION_URL" \
+              -o /tmp/version.public.json; then
+              PUBLIC_VERSION_SHA256=$(sha256sum /tmp/version.public.json | awk '{print $1}')
+              if [ "$PUBLIC_VERSION_SHA256" = "$LOCAL_VERSION_SHA256" ]; then
+                VERSION_READY=1
+              else
+                echo "version.json hash mismatch. public=$PUBLIC_VERSION_SHA256 local=$LOCAL_VERSION_SHA256"
+              fi
+            else
+              echo "version.json is not available yet."
+            fi
+
+            if [ "$APK_READY" = "1" ] && [ "$VERSION_READY" = "1" ]; then
+              echo "GitHub Pages is serving the new files."
+              echo "PUBLIC_APK_URL_WITH_CACHE=$CHECK_APK_URL" >> "$GITHUB_ENV"
+              exit 0
+            fi
+
+            echo "GitHub Pages publish pending... attempt ${attempt}/40. waiting 15 seconds."
+            sleep 15
+          done
+
+          echo "GitHub Pages가 제한 시간 안에 새 APK/version.json을 배포하지 않았습니다. FCM을 보내지 않습니다."
+          exit 1
+
+      - name: Read Firebase project id
+        shell: bash
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
-          python -m pip install --quiet google-auth requests
-          python <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          import requests
-          from google.oauth2 import service_account
-          from google.auth.transport.requests import Request
-
-          service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON", "").strip()
-          if not service_account_json:
-              raise SystemExit("FIREBASE_SERVICE_ACCOUNT_JSON secret is empty.")
-
-          try:
-              service_account_info = json.loads(service_account_json)
-          except json.JSONDecodeError as exc:
-              raise SystemExit(f"FIREBASE_SERVICE_ACCOUNT_JSON is not valid JSON: {exc}")
-
-          project_id = str(service_account_info.get("project_id") or "").strip()
-          if not project_id:
-              raise SystemExit("Firebase service account JSON has no project_id.")
-
-          version_path = None
-          for candidate in (Path("version.json"), Path("downloads/version.json")):
-              if candidate.is_file():
-                  version_path = candidate
-                  break
-
-          if version_path is None:
-              raise SystemExit("version.json not found. Expected version.json or downloads/version.json.")
-
-          with version_path.open("r", encoding="utf-8") as version_file:
-              version_info = json.load(version_file)
-
-          latest_version_code = str(
-              version_info.get("latestVersionCode")
-              or version_info.get("latest_version_code")
-              or ""
-          ).strip()
-          if not latest_version_code:
-              raise SystemExit(f"{version_path} latestVersionCode is empty.")
-
-          apk_url = str(
-              version_info.get("apkUrl")
-              or version_info.get("apk_url")
-              or "https://borinet-dev.github.io/downloads/LibertyBoard.apk"
-          ).strip()
-          message_text = str(
-              version_info.get("message")
-              or "새 버전이 등록되었습니다. 업데이트 후 이용해 주세요."
-          ).strip()
-
-          credentials = service_account.Credentials.from_service_account_info(
-              service_account_info,
-              scopes=["https://www.googleapis.com/auth/firebase.messaging"],
+          set -euo pipefail
+          PROJECT_ID=$(python3 - <<'PY'
+import json
+import os
+print(json.loads(os.environ['FIREBASE_SERVICE_ACCOUNT_JSON'])['project_id'])
+PY
           )
-          credentials.refresh(Request())
+          echo "PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
 
-          payload = {
-              "message": {
-                  "topic": "app_update",
-                  "data": {
-                      "type": "app_update",
-                      "title": "리버티 게시판 앱 업데이트",
-                      "body": message_text,
-                      "apk_url": apk_url,
-                      "apkUrl": apk_url,
-                      "latest_version_code": latest_version_code,
-                      "latestVersionCode": latest_version_code,
-                  },
-                  "android": {
-                      "priority": "HIGH"
-                  }
-              }
-          }
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/firebase.messaging
 
-          response = requests.post(
-              f"https://fcm.googleapis.com/v1/projects/{project_id}/messages:send",
-              headers={
-                  "Authorization": f"Bearer {credentials.token}",
-                  "Content-Type": "application/json; charset=utf-8",
-              },
-              data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-              timeout=20,
-          )
+      - name: Send FCM app update topic message
+        shell: bash
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          set -euo pipefail
 
-          print("version_path=", version_path)
-          print("latestVersionCode=", latest_version_code)
-          print("apkUrl=", apk_url)
-          print("FCM status=", response.status_code)
-          print(response.text)
-          response.raise_for_status()
-          PY
+          python3 - <<'PY'
+import json
+import os
+
+apk_url = os.environ.get('PUBLIC_APK_URL_WITH_CACHE', 'https://borinet-dev.github.io/downloads/LibertyBoard.apk')
+latest = os.environ.get('LATEST_VERSION_CODE', '')
+
+payload = {
+    "message": {
+        "topic": "app_update",
+        "android": {
+            "priority": "HIGH"
+        },
+        "data": {
+            "type": "app_update",
+            "title": "리버티 게시판 앱 업데이트",
+            "body": "새 버전이 등록되었습니다. 업데이트 후 이용해 주세요.",
+            "apk_url": apk_url,
+            "apkUrl": apk_url,
+            "latest_version_code": str(latest),
+            "latestVersionCode": str(latest)
+        }
+    }
+}
+
+with open('fcm-payload.json', 'w', encoding='utf-8') as f:
+    json.dump(payload, f, ensure_ascii=False)
+PY
+
+          echo "Sending app_update FCM. versionCode=${LATEST_VERSION_CODE} apkUrl=${PUBLIC_APK_URL_WITH_CACHE}"
+
+          HTTP_CODE=$(curl -sS -o /tmp/fcm-response.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data @fcm-payload.json \
+            "https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send")
+
+          echo "FCM status=${HTTP_CODE}"
+          cat /tmp/fcm-response.json
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            exit 1
+          fi
