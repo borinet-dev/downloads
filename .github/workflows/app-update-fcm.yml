@@ -1,0 +1,91 @@
+name: Notify LibertyBoard app update
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'downloads/LibertyBoard.apk'
+      - 'downloads/version.json'
+
+jobs:
+  notify-app-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Send FCM app_update topic message
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python -m pip install --quiet google-auth requests
+          python <<'PY'
+          import json
+          import os
+          import requests
+          from google.oauth2 import service_account
+          from google.auth.transport.requests import Request
+
+          service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON", "").strip()
+          if not service_account_json:
+              raise SystemExit("FIREBASE_SERVICE_ACCOUNT_JSON secret is empty.")
+
+          try:
+              service_account_info = json.loads(service_account_json)
+          except json.JSONDecodeError as exc:
+              raise SystemExit(f"FIREBASE_SERVICE_ACCOUNT_JSON is not valid JSON: {exc}")
+
+          project_id = service_account_info.get("project_id")
+          if not project_id:
+              raise SystemExit("Firebase service account JSON has no project_id.")
+
+          version_path = "downloads/version.json"
+          with open(version_path, "r", encoding="utf-8") as version_file:
+              version_info = json.load(version_file)
+
+          latest_version_code = str(version_info.get("latestVersionCode") or "").strip()
+          if not latest_version_code:
+              raise SystemExit("downloads/version.json latestVersionCode is empty.")
+
+          apk_url = str(version_info.get("apkUrl") or "https://borinet-dev.github.io/downloads/LibertyBoard.apk").strip()
+          message_text = str(version_info.get("message") or "새 버전이 등록되었습니다. 업데이트 후 이용해 주세요.").strip()
+
+          credentials = service_account.Credentials.from_service_account_info(
+              service_account_info,
+              scopes=["https://www.googleapis.com/auth/firebase.messaging"],
+          )
+          credentials.refresh(Request())
+
+          payload = {
+              "message": {
+                  "topic": "app_update",
+                  "data": {
+                      "type": "app_update",
+                      "title": "리버티 게시판 앱 업데이트",
+                      "body": message_text,
+                      "apk_url": apk_url,
+                      "apkUrl": apk_url,
+                      "latest_version_code": latest_version_code,
+                      "latestVersionCode": latest_version_code,
+                  },
+                  "android": {
+                      "priority": "HIGH"
+                  }
+              }
+          }
+
+          response = requests.post(
+              f"https://fcm.googleapis.com/v1/projects/{project_id}/messages:send",
+              headers={
+                  "Authorization": f"Bearer {credentials.token}",
+                  "Content-Type": "application/json; charset=utf-8",
+              },
+              data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+              timeout=20,
+          )
+
+          print(response.status_code)
+          print(response.text)
+          response.raise_for_status()
+          PY
