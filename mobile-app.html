@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+	<script>
+		(function() {
+			// 사용자 에이전트 정보를 가져옵니다.
+			var userAgent = navigator.userAgent.toLowerCase();
+
+			// 브라우저가 크롬인지 확인합니다.
+			var isChrome = /chrome/.test(userAgent) && !/edge|edg|opr/.test(userAgent);
+
+			// 크롬이 아니라면 팝업 창을 띄웁니다.
+			if (!isChrome) {
+				alert('이 페이지는 크롬에 최적화되어 있습니다. 크롬 브라우저에서 접속해 주세요.');
+			}
+		})();
+	</script>
+	<style>
+		.count-color { color: red; text-shadow: 2px 2px 2px black; }
+		.info-color { color: yellow; text-shadow: 2px 2px 2px black; }
+		.info-color2 { color: red; text-shadow: 1px 1px 1px black; }
+		.info-color3 { color: black; text-shadow: 1px 1px 1px gray; }
+		.s1 { text-shadow: 4px 4px 5px black; }
+		.s2 { text-shadow: 2px 2px 2px black; }
+		.s3 { text-shadow: 1px 1px 1px black; }
+		.bg-2a2a2a { background-color: #2a2a2a !important; }
+		.bg-2a2a2a .nav-link { color: white !important; transition: color 0.3s ease-in-out; }
+		.bg-2a2a2a .nav-link:hover { color: #90ee90 !important; }
+		.border-bottom { color: red !important; text-decoration: none; transition: color 0.3s ease-in-out; }
+		.border-bottom:hover { color: darkred !important; }
+		body { background-color: #2a2a2a; color: white; font-family: sans-serif; line-height: 1.6; }
+		table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+		th, td { border: 1px solid white; padding: 8px; }
+		th { background-color: #444; }
+		h3 { margin-top: 30px; color: #ffd700; }
+	</style>
+	<meta charset="utf-8">
+	<meta content="width=device-width, initial-scale=1.0" name="viewport">
+	<meta content="" name="keywords">
+	<meta content="" name="description">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">  
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="https://borinet-dev.github.io/css/lib/animate/animate.min.css" rel="stylesheet">
+    <link href="https://borinet-dev.github.io/css/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="https://borinet-dev.github.io/css/lib/lightbox/css/lightbox.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="https://borinet-dev.github.io/css/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+	<link href="https://borinet-dev.github.io/css/css/board.css" rel="stylesheet">
+	<link href="https://borinet-dev.github.io/css/css/style2.css" rel="stylesheet">
+	<link href="https://borinet-dev.github.io/css/css/style3.css" rel="stylesheet">
+</head>
+
+<body style="background-color: #2a2a2a;">
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Navbar Start -->
+		<!-- Header (외부 include) -->
+		<div id="header-placeholder"></div>
+
+		<script>
+		(function(){
+		  const url = "https://borinet-dev.github.io/head/header.html?ver=" + Date.now();
+		  fetch(url).then(r=>r.text()).then(html=>{
+			const holder = document.getElementById('header-placeholder');
+			// wrapper <div>를 nav로 교체 → sticky-top 정상 동작
+			holder.outerHTML = html;
+
+			// favicon/제목 반영
+			const temp = document.createElement("div");
+			temp.innerHTML = html;
+
+			const fav = temp.querySelector('link[rel="navi-favicon"]');
+			if (fav){
+			  let headIcon = document.head.querySelector("link[rel~='icon']");
+			  if(!headIcon){
+				headIcon=document.createElement('link');
+				headIcon.rel='icon';
+				document.head.appendChild(headIcon);
+			  }
+			  headIcon.href = fav.getAttribute('href');
+			}
+
+			const titleMeta = temp.querySelector('meta[name="web-title"]');
+			if (titleMeta) document.title = titleMeta.content;
+		  }).catch(console.error);
+		})();
+		</script>
+	<!-- Navbar End -->
+
+
+    <!-- Page Header Start -->
+    <div class="container-fluid page-header py-5 mb-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center py-5">
+            <h1 class="display-3 text-white mb-4 animated slideInDown s2">모바일 앱 다운로드</h1>
+        </div>
+    </div>
+    <!-- Page Header End -->
+
+
+    <!-- Start -->
+<div id="viewer">
+  <div class="bd" style="
+    background-color:#2a2a2a; color:white;
+    width:1067px !important;
+    max-width:none !important;
+    display:block;
+    box-sizing:border-box;
+    margin:0 auto;
+    flex:0 0 auto; flex-shrink:0;
+  ">
+
+<style>
+  /* 이 영역의 너비를 컨테이너 기준으로 삼음 */
+  #viewer .bd{ container-type:inline-size; }
+
+  /* 버튼 배치 */
+  #viewer .bd .dl-row{
+    display:grid;
+    gap:12px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* 컨테이너 폭에 맞춰 자동 줄바꿈 */
+    justify-items:center;
+    align-items:center;
+  }
+
+  /* 이미지 크기: 컨테이너에 맞춰 축소, 원본(272×70) 초과 금지 */
+  #viewer .bd .dl-row img{
+    display:block;
+    width:min(100%, 272px) !important;
+    height:auto !important;
+  }
+
+  /* 컨테이너가 충분히 넓으면 항상 3개 1줄 */
+  @container (min-width: 960px){
+    #viewer .bd .dl-row{
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* 모바일(뷰포트)에서는 무조건 세로 */
+  @media (max-width: 768px){
+    #viewer .bd .dl-row{ grid-template-columns: 1fr !important; }
+    #viewer .bd .dl-row img{ width:min(92vw, 272px); }
+  }
+
+</style>
+
+<!-- PC용 콘텐츠 -->
+<div id="pc-content" class="section primary-section" style="display:block;">
+
+<div style="max-width:900px;margin:0 auto;padding:28px 18px;background:#101722;color:#e8edf5;font-family:'Malgun Gothic','맑은 고딕',Arial,sans-serif;line-height:1.75;border-radius:14px;">
+
+	<div style="text-align:center;margin-bottom:34px;">
+		<div style="font-size:30px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+			리버티 모바일 앱 안내
+		</div>
+		<div style="font-size:16px;color:#cfd6e4;">
+			리버티 게시판을 휴대폰에서 더 편하게 이용할 수 있는<br>
+			모바일 앱이 출시되었습니다.
+		</div>
+	</div>
+
+	<div style="background:#1a2230;border:1px solid #2d384c;border-radius:12px;padding:22px;margin-bottom:28px;">
+		<div style="font-size:21px;font-weight:800;color:#FFD966;margin-bottom:12px;">
+			앱으로 할 수 있는 것
+		</div>
+		<div style="font-size:15px;color:#dce3ef;">
+			ㆍ모바일에서 리버티 게시판을 편하게 확인할 수 있습니다.<br>
+			ㆍ새 글 또는 새 댓글 알림을 받을 수 있습니다.<br>
+			ㆍ알림을 터치하면 해당 게시글로 바로 이동할 수 있습니다.<br>
+			ㆍ원격 메뉴를 통해 원격 낚시 기능을 사용할 수 있습니다.<br>
+			ㆍ홈 화면에서 서버 상태와 현재 접속자를 실시간으로 확인할 수 있습니다.
+		</div>
+
+		<div style="text-align:center;margin-top:22px;">
+			<img src="https://borinet-dev.github.io/img/app/home.png" style="max-width:720px;width:100%;border-radius:14px;border:1px solid #3a465a;">
+		</div>
+	</div>
+
+	<div style="background:#201b2d;border:1px solid #5d3c86;border-radius:12px;padding:22px;margin-bottom:28px;">
+		<div style="font-size:21px;font-weight:800;color:#FF8888;margin-bottom:12px;">
+			설치 전 안내
+		</div>
+		<div style="font-size:15px;color:#e8edf5;">
+			리버티 모바일 앱은 Google Play에 등록된 앱이 아닌, 리버티에서 직접 배포하는 APK 파일입니다.<br>
+			따라서 설치 과정에서 휴대폰 보안 안내 또는 Google Play 프로텍트 안내가 표시될 수 있습니다.
+		</div>
+		<div style="margin-top:14px;padding:14px 16px;background:#151c28;border-radius:10px;border:1px solid #3a465a;color:#FFD966;font-size:15px;">
+			보안 안내가 표시되면 아래 순서대로 진행해 주세요.
+		</div>
+	</div>
+
+	<div style="margin-bottom:34px;">
+		<div style="font-size:23px;font-weight:800;color:#80C0FF;margin-bottom:16px;">
+			앱 다운로드
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;">
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:18px;">
+				아래 QR 코드를 스마트폰 카메라로 스캔하면 리버티 모바일 앱을 다운로드할 수 있습니다.
+			</div>
+
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/qr.png" style="max-width:300px;width:80%;background:#ffffff;border-radius:16px;border:1px solid #3a465a;padding:10px;">
+			</div>
+		</div>
+	</div>
+
+	<div style="margin-bottom:34px;">
+		<div style="font-size:23px;font-weight:800;color:#FFD966;margin-bottom:16px;">
+			설치 방법
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;margin-bottom:18px;">
+			<div style="font-size:18px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+				1. 보안 및 개인정보 보호 메뉴로 이동
+			</div>
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:16px;">
+				휴대폰 설정에서 <b style="color:#80C0FF;">보안 및 개인정보 보호</b> 메뉴로 이동합니다.
+			</div>
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/app1.png" style="max-width:360px;width:90%;border-radius:14px;border:1px solid #3a465a;">
+			</div>
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;margin-bottom:18px;">
+			<div style="font-size:18px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+				2. 보안 위험 자동 차단 확인
+			</div>
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:16px;">
+				추가 보안 설정에서 <b style="color:#80C0FF;">보안 위험 자동 차단</b> 항목을 확인합니다.
+			</div>
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/app2.png" style="max-width:360px;width:90%;border-radius:14px;border:1px solid #3a465a;">
+			</div>
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;margin-bottom:18px;">
+			<div style="font-size:18px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+				3. 설치가 차단될 경우 잠시 해제
+			</div>
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:16px;">
+				설치가 차단될 경우 <b style="color:#FF8888;">보안 위험 자동 차단</b>을 잠시 해제합니다.
+			</div>
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/app3.png" style="max-width:360px;width:90%;border-radius:14px;border:1px solid #3a465a;">
+			</div>
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;margin-bottom:18px;">
+			<div style="font-size:18px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+				4. 무시하고 설치 선택
+			</div>
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:16px;">
+				앱 설치 안내가 표시되면 <b style="color:#FFD966;">무시하고 설치</b>를 선택합니다.
+			</div>
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/app4.png" style="max-width:360px;width:90%;border-radius:14px;border:1px solid #3a465a;">
+			</div>
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;margin-bottom:18px;">
+			<div style="font-size:18px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+				5. Google Play 프로텍트 안내 확인
+			</div>
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:16px;">
+				Google Play 프로텍트 안내가 표시되면 <b style="color:#80C0FF;">세부정보 더보기</b>를 선택합니다.
+			</div>
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/app5.png" style="max-width:360px;width:90%;border-radius:14px;border:1px solid #3a465a;">
+			</div>
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;margin-bottom:18px;">
+			<div style="font-size:18px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+				6. 무시하고 설치하기 선택
+			</div>
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:16px;">
+				하단에 표시되는 <b style="color:#FFD966;">무시하고 설치하기</b>를 선택하면 설치가 진행됩니다.
+			</div>
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/app6.png" style="max-width:360px;width:90%;border-radius:14px;border:1px solid #3a465a;">
+			</div>
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;margin-bottom:18px;">
+			<div style="font-size:18px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+				7. 설치 완료 후 앱 실행
+			</div>
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:16px;">
+				설치가 완료되면 <b style="color:#80C0FF;">열기</b>를 눌러 리버티 모바일 앱을 실행합니다.
+			</div>
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/app7.png" style="max-width:360px;width:90%;border-radius:14px;border:1px solid #3a465a;">
+			</div>
+		</div>
+
+		<div style="background:#151c28;border:1px solid #2d384c;border-radius:12px;padding:22px;">
+			<div style="font-size:18px;font-weight:800;color:#C080FF;margin-bottom:10px;">
+				8. 알림 권한 허용
+			</div>
+			<div style="font-size:15px;color:#dce3ef;margin-bottom:16px;">
+				새 글과 댓글 알림을 받으려면 알림 권한 요청에서 <b style="color:#FFD966;">허용</b>을 선택해 주세요.
+			</div>
+			<div style="text-align:center;">
+				<img src="https://borinet-dev.github.io/img/app/app8.png" style="max-width:360px;width:90%;border-radius:14px;border:1px solid #3a465a;">
+			</div>
+		</div>
+	</div>
+
+	<div style="background:#241b22;border:1px solid #7a3c46;border-radius:12px;padding:22px;margin-bottom:24px;">
+		<div style="font-size:21px;font-weight:800;color:#FF8888;margin-bottom:12px;">
+			주의사항
+		</div>
+		<div style="font-size:15px;color:#e8edf5;">
+			ㆍ설치 완료 후에는 보안을 위해 <b style="color:#80C0FF;">보안 위험 자동 차단</b>을 다시 켜두는 것을 권장합니다.<br>
+			ㆍ알림을 받으려면 앱 실행 후 알림 권한을 반드시 허용해야 합니다.<br>
+			ㆍ앱 로그인 계정과 런처 계정이 동일하면 게시판 알림과 원격 기능을 정상적으로 사용할 수 있습니다.<br>
+			ㆍ앱 업데이트가 있을 경우 실행 시 업데이트 안내가 표시될 수 있습니다.
+		</div>
+	</div>
+
+	<div style="text-align:center;background:#1d2635;border:1px solid #43516a;border-radius:12px;padding:24px;">
+		<div style="font-size:22px;font-weight:800;color:#C0FFC0;margin-bottom:10px;">
+			리버티 게시판을 더 편하게 이용하세요!
+		</div>
+		<div style="font-size:15px;color:#dce3ef;">
+			모바일 게시판, 새 글 알림, 댓글 알림, 원격 낚시까지<br>
+			앞으로도 더 편하게 사용할 수 있도록 계속 개선하겠습니다.
+		</div>
+	</div>
+
+</div>
+
+</div></div><br><br>
+   <!-- End -->
+        
+
+    <!-- Copyright Start -->
+	<div id="footer-placeholder"></div>
+	<script>
+	  fetch("https://borinet-dev.github.io/head/footer.html?ver=" + Date.now())
+	    .then(r => r.text())
+	    .then(html => {
+	      document.getElementById("footer-placeholder").innerHTML = html;
+	    });
+	</script>
+    <!-- Copyright End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square rounded-circle back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://borinet-dev.github.io/css/lib/wow/wow.min.js"></script>
+	<script src="https://borinet-dev.github.io/css/lib/easing/easing.min.js"></script>
+	<script src="https://borinet-dev.github.io/css/lib/waypoints/waypoints.min.js"></script>
+	<script src="https://borinet-dev.github.io/css/lib/owlcarousel/owl.carousel.min.js"></script>
+	<script src="https://borinet-dev.github.io/css/lib/counterup/counterup.min.js"></script>
+	<script src="https://borinet-dev.github.io/css/lib/parallax/parallax.min.js"></script>
+	<script src="https://borinet-dev.github.io/css/lib/isotope/isotope.pkgd.min.js"></script>
+	<script src="https://borinet-dev.github.io/css/lib/lightbox/js/lightbox.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="https://borinet-dev.github.io/css/js/main.js"></script>
+    </body>
+</html>
+
+
